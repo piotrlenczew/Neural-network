@@ -19,19 +19,60 @@ class MultiLayerPerceptron:
     def __init__(self, params: MultiLayerPerceptronParams):
         self.params = params
 
-        self.weights_l1 = np.random.rand(params.hidden_size1, params.input_size)
-        self.bias_l1 = np.zeros((params.hidden_size1, 1))
-        self.weights_l2 = np.random.rand(params.hidden_size2, params.hidden_size1)
-        self.bias_l2 = np.zeros((params.hidden_size2, 1))
-        self.weights_l3 = np.random.rand(params.output_size, params.hidden_size2)
-        self.bias_l3 = np.zeros((params.output_size, 1))
+        np.random.seed(42)
+        self.weights_l1 = np.random.randn(params.input_size, params.hidden_size1)
+        self.bias_l1 = np.zeros((1, params.hidden_size1))
+        self.weights_l2 = np.random.randn(params.hidden_size1, params.hidden_size2)
+        self.bias_l2 = np.zeros((1, params.hidden_size2))
+        self.weights_l3 = np.random.randn(params.hidden_size2, params.output_size)
+        self.bias_l3 = np.zeros((1, params.output_size))
 
-    @staticmethod
-    def sigmoid(x):
+    def sigmoid(self, x):
         return 1 / (1 + np.exp(-x))
 
+    def sigmoid_derivative(self, x):
+        return self.sigmoid(x) * (1 - self.sigmoid(x))
+
+    def train(self, X, y, method='gradient', lr=0.003, epochs=1000):
+        if method == 'gradient':
+            losses = self._gradient(X, y, lr, epochs)
+            return losses
+        elif method == 'evolutionary':
+            self._evolutionary()
+        else:
+            raise ValueError("Unsupported optimization method")
+
+    def _gradient(self, X, y, lr, epochs):
+        losses = []
+        for epoch in range(epochs):
+            # Forward pass
+            l1_output = self.sigmoid(np.dot(X, self.weights_l1) + self.bias_l1)
+            l2_output = self.sigmoid(np.dot(l1_output, self.weights_l2) + self.bias_l2)
+            output = np.dot(l2_output, self.weights_l3) + self.bias_l3
+
+            # Calculating loss
+            loss = np.mean((output - y)**2)/2
+            losses.append(loss)
+
+            # Backward pass
+            output_error = np.mean(output - y)
+            l2_error = np.dot(output_error, self.weights_l3.T) * self.sigmoid_derivative(l2_output)
+            l1_error = np.dot(l2_error, self.weights_l2.T) * self.sigmoid_derivative(l1_output)
+
+            # Updating weights and biases
+            self.weights_l3 -= lr * np.dot(l2_output.T, output_error)
+            self.bias_l3 -= lr * np.sum(output_error, axis=0, keepdims=True)
+            self.weights_l2 -= lr * np.dot(l1_output.T, l2_error)
+            self.bias_l2 -= lr * np.sum(l2_error, axis=0, keepdims=True)
+            self.weights_l1 -= lr * np.dot(X.T, l1_error)
+            self.bias_l1 -= lr * np.sum(l1_error, axis=0, keepdims=True)
+        return losses
+
+    def _evolutionary(self):
+        pass
+
     def predict(self, X):
-        l1_input = np.dot(self.weights_l1, X) + self.bias_l1
+        l1_input = np.dot(self.weights_l1, X.T) + self.bias_l1
         l1_output = self.sigmoid(l1_input)
 
         l2_input = np.dot(self.weights_l2, l1_output) + self.bias_l2
@@ -39,17 +80,3 @@ class MultiLayerPerceptron:
 
         output = np.dot(self.weights_l3, l2_output) + self.bias_l3
         return output
-
-    def train(self, X, y, method='gradient', lr=0.01, epochs=1000):
-        if method == 'gradient':
-            self._gradient(X, y, lr, epochs)
-        elif method == 'evolutionary':
-            self._evolutionary()
-        else:
-            raise ValueError("Unsupported optimization method")
-
-    def _gradient(self, X, y, lr, epochs):
-        pass
-
-    def _evolutionary(self):
-        pass
