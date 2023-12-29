@@ -51,11 +51,11 @@ class MultiLayerPerceptron:
             output = np.dot(l2_output, self.weights_l3) + self.bias_l3
 
             # Calculating loss
-            loss = np.mean((output - y)**2)/2
+            loss = np.mean((output - y.reshape(-1, 1))**2)/2
             losses.append(loss)
 
             # Backward pass
-            output_error = np.mean(output - y)
+            output_error = output - y.reshape(-1, 1)
             l2_error = np.dot(output_error, self.weights_l3.T) * self.sigmoid_derivative(l2_output)
             l1_error = np.dot(l2_error, self.weights_l2.T) * self.sigmoid_derivative(l1_output)
 
@@ -72,11 +72,7 @@ class MultiLayerPerceptron:
         pass
 
     def predict(self, X):
-        l1_input = np.dot(self.weights_l1, X.T) + self.bias_l1
-        l1_output = self.sigmoid(l1_input)
-
-        l2_input = np.dot(self.weights_l2, l1_output) + self.bias_l2
-        l2_output = self.sigmoid(l2_input)
-
-        output = np.dot(self.weights_l3, l2_output) + self.bias_l3
+        l1_output = self.sigmoid(np.dot(X, self.weights_l1) + self.bias_l1)
+        l2_output = self.sigmoid(np.dot(l1_output, self.weights_l2) + self.bias_l2)
+        output = np.dot(l2_output, self.weights_l3) + self.bias_l3
         return output
