@@ -15,9 +15,9 @@ X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_
 
 mlpParams = MultiLayerPerceptronParams()
 mlp = MultiLayerPerceptron(mlpParams)
-losses = mlp.train(X_train, y_train)
-plt.plot(losses)
-plt.title(f"loss per epochs")
-plt.show()
+losses = mlp.train(X_train, y_train, method='evolutionary')
+# plt.plot(losses)
+# plt.title(f"loss per epochs")
+# plt.show()
 print(y_test)
 print(mlp.predict(X_test))
