@@ -5,8 +5,8 @@ class MultiLayerPerceptronParams:
     def __init__(
         self,
         input_size: int = 1,
-        hidden_size1: int = 10,
-        hidden_size2: int = 5,
+        hidden_size1: int = 64,
+        hidden_size2: int = 32,
         output_size: int = 1
     ):
         self.input_size = input_size
