@@ -31,7 +31,7 @@ class MultiLayerPerceptron:
         return 1 / (1 + np.exp(-x))
 
     def sigmoid_derivative(self, x):
-        return self.sigmoid(x) * (1 - self.sigmoid(x))
+        return x * (1 - x)
 
     def train(self, X, y, method='gradient', lr=0.00005, epochs=1000, population_size=50, generations=100):
         if method == 'gradient':
@@ -53,6 +53,9 @@ class MultiLayerPerceptron:
             # Calculating loss
             loss = np.mean((output - y)**2)/2
             losses.append(loss)
+
+            if epoch % 100 == 0:
+                print(f"Epoch {epoch}, Loss: {loss}")
 
             # Backward pass
             output_error = output - y

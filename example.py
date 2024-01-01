@@ -13,8 +13,8 @@ y_train = target_function(X_train)
 
 # Define the architecture of the MLP
 model = tf.keras.Sequential([
-    tf.keras.layers.Dense(64, activation='sigmoid', input_shape=(1,)),
-    tf.keras.layers.Dense(32, activation='sigmoid'),
+    tf.keras.layers.Dense(64, activation='relu', input_shape=(1,)),
+    tf.keras.layers.Dense(32, activation='relu'),
     tf.keras.layers.Dense(1)
 ])
 
